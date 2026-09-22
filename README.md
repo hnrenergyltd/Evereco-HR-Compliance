@@ -104,9 +104,8 @@ live employee data and must not reach the repository.
 | [docs/SMTP_SETUP.md](docs/SMTP_SETUP.md) | Gmail App Passwords and other providers |
 | [docs/API_REFERENCE.md](docs/API_REFERENCE.md) | All endpoints with access levels |
 
-The `*.md` files in the repository root predate these and are **not maintained**
-— several describe a structure the code no longer has. Treat `docs/` as
-authoritative.
+`docs/` is authoritative. Earlier planning and status documents were removed
+before the first push — several described a structure the code no longer has.
 
 ---
 

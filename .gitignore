@@ -26,7 +26,8 @@ uploads/
 dist/
 build/
 
-# IDE
+# IDE / tooling
+.claude/
 .vscode/
 .idea/
 *.swp
