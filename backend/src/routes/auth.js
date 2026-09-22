@@ -10,13 +10,14 @@ import {
 import { protect } from '../middleware/auth.js';
 import {
   loginLimiter,
+  loginIpLimiter,
   forgotPasswordLimiter,
   resetPasswordLimiter,
 } from '../middleware/rateLimit.js';
 
 const router = express.Router();
 
-router.post('/login', loginLimiter, login);
+router.post('/login', loginIpLimiter, loginLimiter, login);
 router.get('/me', protect, getCurrentUser);
 router.post('/logout', protect, logout);
 

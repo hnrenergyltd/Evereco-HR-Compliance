@@ -1,9 +1,19 @@
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 
 /*
- * Brute-force guard on the credential endpoint. Successful logins are not
- * counted, so a legitimate user working normally is never locked out by their
- * own activity — only repeated failures accumulate.
+ * Brute-force guard on the credential endpoint, in two layers.
+ *
+ * The tight limit is keyed by account *and* client rather than by IP alone.
+ * Keying on IP alone means everyone behind one office connection shares a
+ * single allowance, so one person mistyping their password five times locks
+ * out every colleague for fifteen minutes — and because the block happens
+ * before any password check, it presents as "no password works for anyone",
+ * which looks exactly like a broken authentication system.
+ *
+ * Including the IP as well as the email keeps an attacker from locking a
+ * chosen user out of their own account from somewhere else.
+ *
+ * Successful logins are not counted, so normal use never accumulates.
  */
 export const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -11,7 +21,32 @@ export const loginLimiter = rateLimit({
   skipSuccessfulRequests: true,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'Too many login attempts. Please try again in 15 minutes.' },
+  keyGenerator: (req) => {
+    const email = String(req.body?.email || '')
+      .trim()
+      .toLowerCase();
+    const ip = ipKeyGenerator(req.ip);
+    return email ? `login:${email}:${ip}` : `login:${ip}`;
+  },
+  message: {
+    error:
+      'Too many failed attempts for this account. Please wait 15 minutes, or reset your password.',
+  },
+});
+
+/*
+ * Wider ceiling for the same endpoint, keyed by IP. The per-account limit above
+ * would otherwise let one client work through a list of addresses, five
+ * attempts at a time. Set high enough that a shared office connection doing
+ * ordinary work never reaches it.
+ */
+export const loginIpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  skipSuccessfulRequests: true,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many login attempts from this location. Please try again later.' },
 });
 
 /*
