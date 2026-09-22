@@ -1,0 +1,245 @@
+/* Employee List Container */
+.employees-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.employees-header h1 {
+  margin: 0;
+  font-size: 28px;
+  color: #2C3E50;
+  flex: 1;
+}
+
+/* Add Employee Button */
+.btn-add-employee {
+  padding: 12px 24px;
+  min-height: 44px;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DESKTOP LAYOUT (768px and above)
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (min-width: 768px) {
+  /* Show table layout */
+  .employees-table-wrapper {
+    display: block;
+  }
+
+  /* Hide card layout */
+  .employees-cards-wrapper {
+    display: none;
+  }
+
+  .employees-header {
+    flex-direction: row;
+  }
+
+  .btn-add-employee {
+    flex-shrink: 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE LAYOUT (below 768px)
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  /* Hide table layout */
+  .employees-table-wrapper {
+    display: none;
+  }
+
+  /* Show card layout */
+  .employees-cards-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .employees-header {
+    flex-direction: column;
+    align-items: stretch;
+    margin-bottom: 20px;
+  }
+
+  .employees-header h1 {
+    font-size: 24px;
+    margin-bottom: 12px;
+  }
+
+  .btn-add-employee {
+    width: 100%;
+    padding: 14px 16px;
+    min-height: 48px;
+    font-size: 16px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CARD LAYOUT (Mobile)
+   ═══════════════════════════════════════════════════════════════ */
+
+.employee-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.employee-card {
+  background: #FFFFFF;
+  border: 1px solid #E0E0E0;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  min-height: 140px;
+}
+
+.employee-card:active {
+  background: #F8F9FA;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+/* Card Header with Name and Status */
+.employee-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.employee-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #2C3E50;
+  flex: 1;
+  line-height: 1.3;
+}
+
+.employee-card-header .status-badge {
+  flex-shrink: 0;
+  font-size: 11px;
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+
+/* Card Body with Info */
+.employee-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.employee-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.info-label {
+  font-size: 12px;
+  color: #7F8C8D;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-weight: 600;
+}
+
+.info-value {
+  font-size: 14px;
+  color: #2C3E50;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Card Footer */
+.employee-card-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 8px;
+  border-top: 1px solid #F0F0F0;
+}
+
+.view-profile {
+  font-size: 13px;
+  font-weight: 600;
+  color: #16A085;
+  transition: all 0.2s ease;
+}
+
+.employee-card:active .view-profile {
+  color: #0E7D5E;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TABLE LAYOUT (Desktop)
+   ═══════════════════════════════════════════════════════════════ */
+
+.btn-view-desktop {
+  padding: 6px 12px;
+  font-size: 12px;
+  min-height: auto;
+  white-space: nowrap;
+}
+
+/* Small screens adjustments */
+@media (max-width: 480px) {
+  .employees-header {
+    margin-bottom: 16px;
+  }
+
+  .employees-header h1 {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+
+  .employee-card {
+    padding: 14px;
+    min-height: 130px;
+  }
+
+  .employee-name {
+    font-size: 16px;
+  }
+
+  .btn-add-employee {
+    padding: 12px 14px;
+    min-height: 44px;
+    font-size: 15px;
+  }
+
+  .employees-cards-wrapper {
+    gap: 10px;
+  }
+}
+
+/* Extra small screens (below 360px) */
+@media (max-width: 359px) {
+  .employee-card {
+    padding: 12px;
+  }
+
+  .employee-name {
+    font-size: 15px;
+  }
+
+  .info-label {
+    font-size: 11px;
+  }
+
+  .info-value {
+    font-size: 13px;
+  }
+}

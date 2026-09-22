@@ -1,0 +1,148 @@
+.message {
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.attendance-card {
+  background: linear-gradient(135deg, #F0F7FF 0%, #F5F9FF 100%);
+  border-left: 4px solid #16A085;
+  padding: 24px;
+  border-radius: 8px;
+  max-width: 500px;
+}
+
+.attendance-card h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.1em;
+  color: #2C3E50;
+}
+
+.employee-name {
+  font-size: 1.3em;
+  font-weight: 600;
+  color: #2C3E50;
+  margin: 0 0 16px 0;
+}
+
+.status {
+  font-size: 1em;
+  color: #7F8C8D;
+  margin: 8px 0 20px 0;
+}
+
+.status-badge {
+  display: inline-block;
+  background-color: #22c55e;
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9em;
+  margin-bottom: 12px;
+}
+
+.time-display {
+  font-size: 2em;
+  font-weight: 700;
+  color: #2C3E50;
+  margin: 8px 0;
+  font-family: 'Courier New', monospace;
+}
+
+.location {
+  font-size: 0.95em;
+  color: #7F8C8D;
+  margin: 8px 0 20px 0;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #2C3E50;
+}
+
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+  font-size: 0.95em;
+  font-family: inherit;
+  background-color: #FFFFFF;
+  color: #2C3E50;
+}
+
+.form-group select:focus {
+  outline: none;
+  border-color: #16A085;
+  box-shadow: 0 0 0 3px rgba(22, 160, 133, 0.1);
+}
+
+.btn-clock-in,
+.btn-clock-out {
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  touch-action: manipulation;
+  min-height: 50px;
+}
+
+.btn-clock-in {
+  background-color: #22c55e;
+  color: white;
+}
+
+.btn-clock-in:hover:not(:disabled) {
+  background-color: #16a34a;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+.btn-clock-out {
+  background-color: #ef4444;
+  color: white;
+}
+
+.btn-clock-out:hover:not(:disabled) {
+  background-color: #dc2626;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-clock-in:disabled,
+.btn-clock-out:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .attendance-card {
+    max-width: 100%;
+  }
+
+  .time-display {
+    font-size: 1.5em;
+  }
+}

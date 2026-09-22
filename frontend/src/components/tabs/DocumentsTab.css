@@ -1,0 +1,630 @@
+.documents-container {
+  max-width: 1200px;
+}
+
+.message {
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Filter Section */
+.filter-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-group label {
+  font-weight: 500;
+  font-size: 0.85em;
+  color: var(--text-light);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-group select,
+.filter-group input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.95em;
+  font-family: inherit;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+  outline: none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(70, 180, 182, 0.1);
+}
+
+.btn-filter-clear {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.9em;
+  align-self: flex-end;
+  transition: all 0.2s ease;
+}
+
+.btn-filter-clear:hover {
+  background-color: #f0f0f0;
+}
+
+/* Upload Section */
+.upload-section {
+  margin-bottom: 24px;
+}
+
+.btn-upload-toggle {
+  padding: 12px 24px;
+  background-color: var(--secondary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  min-height: 50px;
+  font-size: 0.95em;
+  transition: all 0.2s ease;
+}
+
+.btn-upload-toggle:hover {
+  background-color: #3b9ca0;
+}
+
+.upload-form {
+  margin-top: 16px;
+  padding: 24px;
+  background: white;
+  border: 1px solid #ddd;
+}
+
+.upload-form h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-size: 0.9em;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.95em;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(70, 180, 182, 0.1);
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group.checkbox-group {
+  flex-direction: row;
+  align-items: center;
+}
+
+.form-group.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-weight: 400;
+}
+
+.form-group.checkbox-group input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.file-upload {
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  background: #f9fafb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.file-upload:hover {
+  border-color: var(--secondary);
+  background: #f0f8f9;
+  border-width: 2px;
+}
+
+.file-upload:active {
+  border-color: var(--secondary);
+  background: #e0f1f3;
+}
+
+.file-upload input[type="file"] {
+  display: none;
+}
+
+.file-info {
+  margin: 0;
+  color: var(--text-light);
+  font-size: 0.9em;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.btn-save,
+.btn-cancel,
+.btn-delete,
+.btn-edit,
+.btn-view,
+.btn-download,
+.btn-close {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 40px;
+}
+
+.btn-save {
+  background-color: var(--secondary);
+  color: white;
+  flex: 1;
+}
+
+.btn-save:hover:not(:disabled) {
+  background-color: #3b9ca0;
+}
+
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-cancel {
+  background-color: #f0f0f0;
+  color: var(--text);
+  flex: 1;
+  border: 1px solid #ddd;
+}
+
+.btn-cancel:hover {
+  background-color: #e8e8e8;
+}
+
+/* Documents Table */
+.documents-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 24px;
+}
+
+.documents-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.documents-table thead {
+  background-color: #f5f5f5;
+}
+
+.documents-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #ddd;
+  color: var(--text);
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.documents-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  color: var(--text);
+  font-size: 0.95em;
+}
+
+.documents-table tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+.doc-name {
+  font-weight: 500;
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-weight: 500;
+  color: white;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badge-valid {
+  background-color: #dcfce7;
+  color: #10b981;
+}
+
+.badge-warning {
+  background-color: #fef3c7;
+  color: #f59e0b;
+}
+
+.badge-expired {
+  background-color: #fee2e2;
+  color: #ef4444;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.results-summary {
+  margin: 0 0 12px 0;
+  font-size: 0.88em;
+  color: #6B7280;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.btn-page {
+  padding: 10px 18px;
+  min-height: 44px;
+  border: 1px solid #E0E0E0;
+  border-radius: 6px;
+  background-color: #FFFFFF;
+  color: #2C3E50;
+  font-size: 0.9em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  touch-action: manipulation;
+}
+
+.btn-page:hover:not(:disabled) {
+  background-color: #F8F9FA;
+  border-color: #BDC3C7;
+}
+
+.btn-page:disabled {
+  background-color: #E9ECEF;
+  color: #BDC3C7;
+  cursor: not-allowed;
+}
+
+.page-indicator {
+  font-size: 0.9em;
+  font-weight: 600;
+  color: #2C3E50;
+  white-space: nowrap;
+}
+
+/* Marks a document that only administrators can see. */
+.badge-muted {
+  background-color: #E9ECEF;
+  color: #495057;
+}
+
+.field-hint {
+  margin: 6px 0 0 0;
+  font-size: 0.82em;
+  color: #6B7280;
+  line-height: 1.4;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-action {
+  padding: 6px 12px !important;
+  font-size: 0.85em !important;
+  min-height: 36px !important;
+}
+
+.btn-view {
+  background-color: #3B82F6;
+  color: white;
+}
+
+.btn-view:hover {
+  background-color: #2563EB;
+}
+
+.btn-download {
+  background-color: #10B981;
+  color: white;
+}
+
+.btn-download:hover {
+  background-color: #059669;
+}
+
+.btn-edit {
+  background-color: #F59E0B;
+  color: white;
+}
+
+.btn-edit:hover {
+  background-color: #D97706;
+}
+
+.btn-delete {
+  background-color: #EF4444;
+  color: white;
+}
+
+.btn-delete:hover {
+  background-color: #DC2626;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #ddd;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: var(--text);
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+  color: var(--text-light);
+  padding: 0 !important;
+  min-height: auto !important;
+}
+
+.btn-close:hover {
+  color: var(--text);
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.preview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.info-row {
+  display: flex;
+  gap: 12px;
+}
+
+.info-row.full-width {
+  flex-direction: column;
+}
+
+.info-row .label {
+  font-weight: 500;
+  min-width: 120px;
+  color: var(--text-light);
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-row p {
+  margin: 0;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #ddd;
+  background: #f9fafb;
+}
+
+.modal-actions .btn-cancel,
+.modal-actions .btn-download,
+.modal-actions .btn-delete {
+  flex: 1;
+  margin: 0;
+}
+
+.empty-message,
+.loading {
+  text-align: center;
+  color: var(--text-light);
+  padding: 40px;
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .filter-section {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .documents-table {
+    font-size: 0.85em;
+  }
+
+  .documents-table th,
+  .documents-table td {
+    padding: 8px;
+  }
+
+  /* Previous / page indicator / Next stay on one readable row rather than
+     stacking, with the indicator centred between the two controls. */
+  .pagination-controls {
+    gap: 8px;
+  }
+
+  .btn-page {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 10px 8px;
+    font-size: 0.85em;
+  }
+
+  .page-indicator {
+    flex: 0 0 auto;
+    font-size: 0.85em;
+    text-align: center;
+  }
+
+  .results-summary {
+    font-size: 0.85em;
+  }
+
+  .actions {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  /* The base rule pins these to 36px with !important, which is below the
+     44px touch target, so it has to be overridden at the same weight. */
+  .btn-action {
+    width: 100%;
+    min-height: 44px !important;
+    font-size: 0.9em !important;
+  }
+
+  .modal-content {
+    max-width: 95%;
+    width: 95%;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .btn-save,
+  .btn-cancel {
+    width: 100%;
+  }
+}

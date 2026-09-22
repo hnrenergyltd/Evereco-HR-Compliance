@@ -1,0 +1,224 @@
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Delete Confirmation Modal */
+.delete-confirmation-modal {
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 420px;
+  animation: slideUp 0.3s ease;
+  /* Without these the modal overflows the viewport in landscape and the
+     confirm/cancel buttons become unreachable. */
+  max-height: 90vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.delete-confirmation-modal.dangerous {
+  border: 2px solid #E74C3C;
+}
+
+/* Modal Header */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #2C3E50;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #7F8C8D;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover:not(:disabled) {
+  background-color: #F0F0F0;
+  color: #2C3E50;
+}
+
+.modal-close-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Modal Body */
+.modal-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.modal-icon {
+  font-size: 48px;
+  line-height: 1;
+}
+
+.modal-message {
+  margin: 0;
+  font-size: 16px;
+  color: #2C3E50;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.modal-warning {
+  width: 100%;
+  background-color: #FFF3CD;
+  border: 1px solid #FFE69C;
+  border-radius: 6px;
+  padding: 12px 14px;
+  font-size: 14px;
+  color: #856404;
+  line-height: 1.5;
+}
+
+.delete-confirmation-modal.dangerous .modal-warning {
+  background-color: #F8D7DA;
+  border-color: #F5C6CB;
+  color: #721C24;
+}
+
+/* Modal Footer */
+.modal-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px 24px;
+  justify-content: flex-end;
+}
+
+.modal-footer .btn {
+  min-width: 100px;
+  padding: 10px 20px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.modal-footer .btn-secondary {
+  background-color: #E9ECEF;
+  color: #2C3E50;
+}
+
+.modal-footer .btn-secondary:hover:not(:disabled) {
+  background-color: #D9DCE0;
+}
+
+.modal-footer .btn-primary {
+  background-color: #16A085;
+  color: #FFFFFF;
+}
+
+.modal-footer .btn-primary:hover:not(:disabled) {
+  background-color: #0E7D5E;
+}
+
+.modal-footer .btn-danger {
+  background-color: #E74C3C;
+  color: #FFFFFF;
+}
+
+.modal-footer .btn-danger:hover:not(:disabled) {
+  background-color: #C0392B;
+}
+
+.modal-footer .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .delete-confirmation-modal {
+    max-width: 100%;
+  }
+
+  .modal-header {
+    padding: 20px 20px 14px;
+  }
+
+  .modal-title {
+    font-size: 18px;
+  }
+
+  .modal-body {
+    padding: 20px;
+    gap: 14px;
+  }
+
+  .modal-icon {
+    font-size: 40px;
+  }
+
+  .modal-message {
+    font-size: 15px;
+  }
+
+  .modal-footer {
+    padding: 14px 20px 20px;
+    flex-direction: column;
+  }
+
+  .modal-footer .btn {
+    width: 100%;
+    min-width: auto;
+  }
+}

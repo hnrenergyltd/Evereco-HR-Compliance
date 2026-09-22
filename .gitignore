@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Environment — never commit real credentials
+.env
+.env.local
+.env.*.local
+
+# Databases. These hold live employee records, password hashes and the audit
+# trail; publishing one would disclose personal data for every employee.
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+data/
+
+# Uploaded employee documents (passports, visas, contracts). Same reasoning.
+secure_documents/
+uploads/
+
+# Build output
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/

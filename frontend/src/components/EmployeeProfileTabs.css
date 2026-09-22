@@ -1,0 +1,179 @@
+/* Tab Navigation Wrapper */
+.tabs-wrapper {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  position: relative;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #E5E7EB;
+  background: #FFFFFF;
+}
+
+/* Tab Navigation Styling */
+.tabs {
+  display: flex;
+  padding-bottom: 0;
+  overflow-x: auto;
+  background: #FFFFFF;
+  gap: 0;
+  flex: 1;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  /* Hide scrollbar */
+  scrollbar-width: none;
+  border-bottom: none;
+  color: #6B7280;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+
+/* Individual Tab Styling */
+.tab {
+  padding: 16px 20px;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: none;
+  cursor: pointer;
+  font-size: 17px;
+  font-weight: 500;
+  color: #6B7280;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  position: relative;
+  flex-shrink: 0;
+  margin-bottom: 2px;
+}
+
+/* Inactive Tab Hover State */
+.tab:hover:not(.active) {
+  color: #374151;
+  background-color: #F3F4F6;
+  border-bottom-color: #D1D5DB;
+}
+
+/* Active Tab Styling */
+.tab.active {
+  color: #2C3E50;
+  font-weight: 700;
+  border-bottom: 3px solid #16A085;
+}
+
+/* Active Tab Hover - Slightly darker */
+.tab.active:hover {
+  color: #1F2937;
+  background-color: rgba(22, 160, 133, 0.05);
+}
+
+/* Focus/Keyboard Navigation */
+.tab:focus-visible {
+  outline: 2px solid #16A085;
+  outline-offset: -4px;
+}
+
+/* Tab Scroll Buttons */
+.tab-scroll-btn {
+  display: none;
+  background: #FFFFFF;
+  border: none;
+  border-left: 1px solid #E5E7EB;
+  cursor: pointer;
+  font-size: 24px;
+  color: #6B7280;
+  padding: 8px 12px;
+  min-width: 44px;
+  height: auto;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+}
+
+.tab-scroll-btn:hover {
+  background-color: #F3F4F6;
+  color: #2C3E50;
+}
+
+.tab-scroll-btn:active {
+  background-color: #E5E7EB;
+  color: #2C3E50;
+}
+
+.tab-scroll-left {
+  order: -1;
+  border-left: none;
+  border-right: 1px solid #E5E7EB;
+}
+
+.tab-scroll-right {
+  border-left: 1px solid #E5E7EB;
+}
+
+/* Responsive - Desktop: Show arrow buttons */
+@media (min-width: 1024px) {
+  .tab-scroll-btn {
+    display: flex;
+  }
+}
+
+/* Responsive - Tablet/Mobile: Hide arrow buttons */
+@media (max-width: 1023px) {
+  .tab-scroll-btn {
+    display: none !important;
+  }
+
+  .tabs-wrapper {
+    margin-bottom: 24px;
+  }
+}
+
+/* Responsive - Mobile/Tablet */
+@media (max-width: 768px) {
+  .tab {
+    padding: 14px 16px;
+    font-size: 14px;
+  }
+
+  .tabs-wrapper {
+    margin-bottom: 20px;
+  }
+}
+
+/* Responsive - Very small screens */
+@media (max-width: 480px) {
+  .tab {
+    padding: 12px 12px;
+    font-size: 13px;
+  }
+
+  .tabs {
+    gap: 0;
+    border-bottom: 2px solid #E5E7EB;
+  }
+
+  .tabs-wrapper {
+    margin-bottom: 20px;
+  }
+}
+
+/* Smooth scroll indicator (optional) */
+.tabs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.tabs::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.tabs::-webkit-scrollbar-thumb {
+  background: #16A085;
+  border-radius: 2px;
+}
+
+.tabs::-webkit-scrollbar-thumb:hover {
+  background: #0e7660;
+}
