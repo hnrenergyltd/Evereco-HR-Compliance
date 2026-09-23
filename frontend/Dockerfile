@@ -14,6 +14,7 @@ COPY package*.json ./
 RUN npm install --omit=dev
 COPY --from=builder /app/dist ./dist
 COPY server.js ./
-# Railway supplies PORT; server.js falls back to 3000 to match the generated domain.
-EXPOSE 3000
+# Railway reads EXPOSE to pick the port its edge proxy forwards to, so this must
+# match the port server.js listens on (PORT, else 8080).
+EXPOSE 8080
 CMD ["node", "server.js"]

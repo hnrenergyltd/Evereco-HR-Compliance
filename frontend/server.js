@@ -21,7 +21,7 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 const BACKEND_URL = process.env.BACKEND_URL;
 
 if (!BACKEND_URL) {
