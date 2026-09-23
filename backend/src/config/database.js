@@ -195,7 +195,36 @@ export async function initializeDatabase() {
                 }
                 console.log('✅ Database schema initialized');
                 console.log(`✅ Tables created: ${tables.map(t => t.name).join(', ')}`);
-                resolve();
+
+                // Bootstrap admin user if none exist
+                sqliteDb.get('SELECT COUNT(*) as count FROM users', async (err, row) => {
+                  if (!err && row.count === 0) {
+                    try {
+                      const bcrypt = await import('bcryptjs');
+                      const adminEmail = process.env.ADMIN_EMAIL || 'admin@evereco.com';
+                      const adminPassword = process.env.ADMIN_PASSWORD || 'EverecoAdmin2026!';
+                      const hash = await bcrypt.default.hash(adminPassword, 10);
+
+                      sqliteDb.run(
+                        'INSERT INTO users (email, password_hash, role, name) VALUES (?, ?, ?, ?)',
+                        [adminEmail, hash, 'admin', 'Admin User'],
+                        (insertErr) => {
+                          if (insertErr) {
+                            console.error('Error creating admin user:', insertErr);
+                          } else {
+                            console.log(`✅ Admin user created: ${adminEmail}`);
+                          }
+                          resolve();
+                        }
+                      );
+                    } catch (e) {
+                      console.error('Error bootstrapping admin:', e);
+                      resolve();
+                    }
+                  } else {
+                    resolve();
+                  }
+                });
               }
             }
           );
