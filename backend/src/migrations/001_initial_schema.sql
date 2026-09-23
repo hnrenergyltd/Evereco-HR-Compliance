@@ -177,8 +177,10 @@ CREATE INDEX IF NOT EXISTS idx_documents_employee ON documents(employee_id);
 CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_history(user_id);
 
 -- Insert default admin user (password: Change123!)
+-- The hash here was previously a placeholder string that merely looked like
+-- bcrypt output, so the seeded account could never be signed in to.
 INSERT OR IGNORE INTO users (email, name, password_hash, role)
-VALUES ('admin@evereco.com', 'Administrator', '$2a$10$KIX4YZxgbTXKLX4f.5u8h.1/xKXk7GW7.0J7J1hKd8wT.E0Pb5pR6', 'admin');
+VALUES ('admin@evereco.com', 'Administrator', '$2a$10$WLps/hyt/TlEMMvQU.4BwueYArm4i7VVUueXzY8Jm11WQGuC8rz3y', 'admin');
 
 -- Insert initial employees.
 -- OR IGNORE only suppresses UNIQUE/PK conflicts, and there is no unique

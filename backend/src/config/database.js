@@ -196,14 +196,44 @@ export async function initializeDatabase() {
                 console.log('✅ Database schema initialized');
                 console.log(`✅ Tables created: ${tables.map(t => t.name).join(', ')}`);
 
-                // Bootstrap admin user if none exist
-                sqliteDb.get('SELECT COUNT(*) as count FROM users', async (err, row) => {
-                  if (!err && row.count === 0) {
-                    try {
-                      const bcrypt = await import('bcryptjs');
-                      const adminEmail = process.env.ADMIN_EMAIL || 'admin@evereco.com';
-                      const adminPassword = process.env.ADMIN_PASSWORD || 'EverecoAdmin2026!';
-                      const hash = await bcrypt.default.hash(adminPassword, 10);
+                /*
+                 * Apply the administrator credentials supplied in the
+                 * environment. This deliberately runs on every start rather
+                 * than only against an empty database: the schema above seeds
+                 * an admin row, so "no users yet" was never true on a deployed
+                 * instance and these variables were silently ignored.
+                 *
+                 * Because it reapplies on each boot, ADMIN_PASSWORD should be
+                 * removed from the environment once the account is usable,
+                 * otherwise it will overwrite a password changed in the app.
+                 */
+                const adminEmail = process.env.ADMIN_EMAIL;
+                const adminPassword = process.env.ADMIN_PASSWORD;
+
+                if (!adminEmail || !adminPassword) {
+                  resolve();
+                  return;
+                }
+
+                try {
+                  const bcrypt = await import('bcryptjs');
+                  const hash = await bcrypt.default.hash(adminPassword, 10);
+
+                  sqliteDb.run(
+                    'UPDATE users SET password_hash = ?, role = ? WHERE email = ?',
+                    [hash, 'admin', adminEmail],
+                    function (updateErr) {
+                      if (updateErr) {
+                        console.error('Error updating admin user:', updateErr);
+                        resolve();
+                        return;
+                      }
+
+                      if (this.changes > 0) {
+                        console.log(`✅ Admin password applied from environment: ${adminEmail}`);
+                        resolve();
+                        return;
+                      }
 
                       sqliteDb.run(
                         'INSERT INTO users (email, password_hash, role, name) VALUES (?, ?, ?, ?)',
@@ -217,14 +247,12 @@ export async function initializeDatabase() {
                           resolve();
                         }
                       );
-                    } catch (e) {
-                      console.error('Error bootstrapping admin:', e);
-                      resolve();
                     }
-                  } else {
-                    resolve();
-                  }
-                });
+                  );
+                } catch (e) {
+                  console.error('Error provisioning admin:', e);
+                  resolve();
+                }
               }
             }
           );
