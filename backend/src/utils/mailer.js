@@ -29,6 +29,12 @@ export async function initializeEmailService() {
       port: SMTP_PORT,
       secure: SMTP_PORT === 465,
       auth: { user: SMTP_USER, pass: SMTP_PASS },
+      // Without these, a blocked outbound port leaves the connection hanging
+      // for nodemailer's two-minute default — and because startup awaits this
+      // verification, the whole service sits unreachable for that long.
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 20000,
     });
 
     // Verify connection
@@ -40,6 +46,12 @@ export async function initializeEmailService() {
     return true;
   } catch (error) {
     console.error('❌ Email Service initialization failed:', error.message);
+    if (/timeout|ETIMEDOUT|ECONNREFUSED/i.test(error.message) && SMTP_PORT !== 465) {
+      console.error(
+        `   Could not open ${SMTP_HOST}:${SMTP_PORT}. Hosts commonly block outbound 587;` +
+          ' try SMTP_PORT=465, which this client switches to implicit TLS.'
+      );
+    }
     emailServiceReady = false;
     return false;
   }
