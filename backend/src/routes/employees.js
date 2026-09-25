@@ -29,6 +29,7 @@ import {
   clockOut,
   getAttendanceHistory,
   requestCorrection,
+  getCorrectionAuditLog,
   getCurrentClockInStatus,
   addRetrospectiveAttendance,
 } from '../controllers/attendanceController.js';
@@ -101,7 +102,8 @@ router.get('/:id/attendance/status', protect, getCurrentClockInStatus);
 router.post('/:id/attendance/clock-in', protect, clockIn);
 router.put('/:id/attendance/:recordId/clock-out', protect, clockOut);
 router.get('/:id/attendance', protect, getAttendanceHistory);
-router.post('/:id/attendance/:recordId/correction', protect, requestCorrection);
+router.post('/:id/attendance/:recordId/correction', protect, adminOnly, requestCorrection);
+router.get('/:id/attendance/corrections', protect, adminOnly, getCorrectionAuditLog);
 router.post('/:id/attendance/retrospective', protect, adminOnly, addRetrospectiveAttendance);
 
 // Absence endpoints

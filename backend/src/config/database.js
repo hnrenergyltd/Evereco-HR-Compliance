@@ -55,6 +55,10 @@ if (isSQLite) {
  * so timestamp columns are added without one.
  */
 const REQUIRED_COLUMNS = {
+  attendance_corrections: [
+    ['original_location', 'TEXT'],
+    ['requested_location', 'TEXT'],
+  ],
   documents: [
     ['file_size', 'INTEGER'],
     ['file_mime_type', 'TEXT'],

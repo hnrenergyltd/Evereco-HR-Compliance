@@ -28,8 +28,11 @@ function Dashboard() {
           const user = JSON.parse(userStr);
           setCurrentUser(user);
 
-          const empId = user?.employee_id || user?.id;
-          if (empId) {
+          // Admins have no employee record of their own, and user.id is not an
+          // employee id — falling back to it clocked the admin in against
+          // whichever employee happened to share that number.
+          const empId = user?.employee_id;
+          if (user?.role === 'employee' && empId) {
             const clockRes = await api.get(`/employees/${empId}/attendance/status`);
             setIsClockedIn(clockRes.data.isClockedIn);
             if (clockRes.data.isClockedIn) {
@@ -52,7 +55,7 @@ function Dashboard() {
     setMessage(null);
 
     try {
-      const empId = currentUser?.employee_id || currentUser?.id;
+      const empId = currentUser?.employee_id;
       const response = await api.post(`/employees/${empId}/attendance/clock-in`, {
         location,
         site_name: null
@@ -76,7 +79,7 @@ function Dashboard() {
     setMessage(null);
 
     try {
-      const empId = currentUser?.employee_id || currentUser?.id;
+      const empId = currentUser?.employee_id;
       const response = await api.put(`/employees/${empId}/attendance/${clockStatus.id}/clock-out`);
 
       if (response.status === 200) {
@@ -104,7 +107,7 @@ function Dashboard() {
         </div>
       )}
 
-      {currentUser && (
+      {currentUser?.role === 'employee' && (
         <div className="attendance-card" style={{ marginTop: '30px' }}>
           <h2>TODAY'S ATTENDANCE</h2>
           <p className="employee-name">{currentUser.name || currentUser.email || 'Employee'}</p>

@@ -9,13 +9,69 @@ function getTodayDate() {
   return today.toISOString().split('T')[0];
 }
 
+/*
+ * Every day carries a fixed unpaid break from 13:00 to 14:00. It is deducted
+ * only when the shift spans the whole window: a shift starting after 14:00 or
+ * ending before 13:00 never overlapped it and is left alone.
+ */
+const BREAK_START_HOUR = 13;
+const BREAK_END_HOUR = 14;
+const BREAK_HOURS = 1;
+
+const londonTimeFormatter = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Europe/London',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+});
+
+/*
+ * Clock times are stored as UTC instants but the break is a wall-clock rule, so
+ * the comparison has to be made in London time. Reading the hour off the raw
+ * Date would place the break an hour early through British Summer Time.
+ */
+function londonMinutesSinceMidnight(iso) {
+  const [hour, minute] = londonTimeFormatter.format(new Date(iso)).split(':').map(Number);
+  return (hour % 24) * 60 + minute;
+}
+
+function round2(value) {
+  return Math.round(value * 100) / 100;
+}
+
 function calculateHours(clockInTime, clockOutTime) {
   if (!clockInTime || !clockOutTime) return null;
-  const inTime = new Date(clockInTime);
-  const outTime = new Date(clockOutTime);
-  const diffMs = outTime - inTime;
-  const hours = diffMs / (1000 * 60 * 60);
-  return Math.round(hours * 100) / 100;
+  return round2((new Date(clockOutTime) - new Date(clockInTime)) / (1000 * 60 * 60));
+}
+
+function calculateBreakHours(clockInTime, clockOutTime) {
+  if (!clockInTime || !clockOutTime) return 0;
+  const start = londonMinutesSinceMidnight(clockInTime);
+  const end = londonMinutesSinceMidnight(clockOutTime);
+  const spansBreak = start < BREAK_START_HOUR * 60 && end > BREAK_END_HOUR * 60;
+  return spansBreak ? BREAK_HOURS : 0;
+}
+
+function calculateNetHours(clockInTime, clockOutTime) {
+  const gross = calculateHours(clockInTime, clockOutTime);
+  if (gross === null) return null;
+  return round2(gross - calculateBreakHours(clockInTime, clockOutTime));
+}
+
+/*
+ * Gross, break and net are derived on read rather than stored, so records
+ * written before the break rule existed report it on the same terms as new ones.
+ */
+function withHours(record) {
+  if (!record) return record;
+  const gross = calculateHours(record.clock_in_time, record.clock_out_time);
+  const breakHours = calculateBreakHours(record.clock_in_time, record.clock_out_time);
+  return {
+    ...record,
+    gross_hours: gross,
+    break_hours: breakHours,
+    net_hours: gross === null ? null : round2(gross - breakHours),
+  };
 }
 
 export async function clockIn(req, res) {
@@ -62,7 +118,7 @@ export async function clockIn(req, res) {
     );
 
     res.status(201).json({
-      ...result.rows[0],
+      ...withHours(result.rows[0]),
       message: 'Clocked in successfully'
     });
   } catch (error) {
@@ -94,7 +150,9 @@ export async function clockOut(req, res) {
     }
 
     const clockInTime = recordCheck.rows[0].clock_in_time;
-    const totalHours = calculateHours(clockInTime, clockOutTime);
+    // Stored hours are net of the unpaid break, since that is what attendance
+    // records and payroll are based on.
+    const totalHours = calculateNetHours(clockInTime, clockOutTime);
 
     // Update with clock out time
     await query(
@@ -111,7 +169,7 @@ export async function clockOut(req, res) {
     );
 
     res.json({
-      ...result.rows[0],
+      ...withHours(result.rows[0]),
       message: `Clocked out successfully. Total time: ${totalHours} hours`
     });
   } catch (error) {
@@ -135,7 +193,7 @@ export async function getAttendanceHistory(req, res) {
       [employeeId]
     );
 
-    res.json(result.rows);
+    res.json(result.rows.map(withHours));
   } catch (error) {
     console.error('Error fetching attendance history:', error);
     res.status(500).json({ error: 'Failed to fetch attendance history' });
@@ -159,7 +217,7 @@ export async function getTodayAttendance(req, res) {
       [today]
     );
 
-    res.json(result.rows);
+    res.json(result.rows.map(withHours));
   } catch (error) {
     console.error('Error fetching today attendance:', error);
     res.status(500).json({ error: 'Failed to fetch attendance' });
@@ -171,20 +229,22 @@ export async function requestCorrection(req, res) {
   const employeeId = parseInt(id);
   const recordRowId = parseInt(recordId);
 
-  if (req.user.role === 'employee' && req.user.employee_id !== employeeId) {
-    return res.status(403).json({ error: 'Not authorized' });
+  // Corrections are an administrative action: employees who need one raise it
+  // with an administrator rather than amending their own record.
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Only admins can correct attendance' });
   }
 
-  const { requested_clock_in, requested_clock_out, reason } = req.body;
+  const { requested_clock_in, requested_clock_out, requested_location } = req.body;
 
-  if (!requested_clock_in || !reason) {
-    return res.status(400).json({ error: 'Clock in time and reason are required' });
+  if (!requested_clock_in) {
+    return res.status(400).json({ error: 'Clock in time is required' });
   }
 
   try {
     // Verify the record belongs to this employee
     const recordCheck = await query(
-      `SELECT rowid as id, clock_in_time, clock_out_time FROM attendance_records WHERE rowid = ? AND employee_id = ?`,
+      `SELECT rowid as id, clock_in_time, clock_out_time, location FROM attendance_records WHERE rowid = ? AND employee_id = ?`,
       [recordRowId, employeeId]
     );
 
@@ -194,12 +254,49 @@ export async function requestCorrection(req, res) {
 
     const record = recordCheck.rows[0];
 
-    // Update the attendance record directly with the corrected times
-    const totalHours = calculateHours(requested_clock_in, requested_clock_out);
+    /*
+     * Capture the superseded times before overwriting them. The correction is
+     * applied straight to the record, so this row is the only remaining copy of
+     * what was originally clocked and is what the admin audit log reads back.
+     *
+     * `reason` is NOT NULL in the schema but is no longer collected from the
+     * employee, so it is stored empty rather than dropping the column.
+     */
+    const location = requested_location || record.location;
+
     await query(
-      `UPDATE attendance_records SET clock_in_time = ?, clock_out_time = ?, total_hours = ?, status = ?, updated_at = CURRENT_TIMESTAMP
+      `INSERT INTO attendance_corrections
+         (employee_id, attendance_record_id, original_clock_in, original_clock_out,
+          original_location, requested_clock_in, requested_clock_out, requested_location,
+          reason, status, approved_by, approval_date)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'applied', ?, CURRENT_TIMESTAMP)`,
+      [
+        employeeId,
+        recordRowId,
+        record.clock_in_time,
+        record.clock_out_time,
+        record.location,
+        requested_clock_in,
+        requested_clock_out || null,
+        location,
+        '',
+        req.user.id,
+      ]
+    );
+
+    /*
+     * The record keeps its ordinary status. Writing a distinct 'Corrected'
+     * status here previously surfaced the change in the attendance table that
+     * employees see; corrections are visible only through the admin audit log.
+     */
+    // Net hours are recomputed from the amended times, so the break deduction
+    // follows the correction automatically.
+    const totalHours = calculateNetHours(requested_clock_in, requested_clock_out);
+    const status = requested_clock_out ? 'complete' : 'incomplete';
+    await query(
+      `UPDATE attendance_records SET clock_in_time = ?, clock_out_time = ?, location = ?, total_hours = ?, status = ?, updated_at = CURRENT_TIMESTAMP
        WHERE rowid = ?`,
-      [requested_clock_in, requested_clock_out || null, totalHours, 'Corrected', recordRowId]
+      [requested_clock_in, requested_clock_out || null, location, totalHours, status, recordRowId]
     );
 
     // Create audit trail for the correction
@@ -217,7 +314,7 @@ export async function requestCorrection(req, res) {
     );
 
     res.json({
-      ...result.rows[0],
+      ...withHours(result.rows[0]),
       message: 'Attendance corrected successfully'
     });
   } catch (error) {
@@ -246,6 +343,41 @@ export async function getPendingCorrections(req, res) {
   } catch (error) {
     console.error('Error fetching corrections:', error);
     res.status(500).json({ error: 'Failed to fetch corrections' });
+  }
+}
+
+/*
+ * Admin-only history of corrections applied to one employee's attendance.
+ * Employees must not be able to reach this: the attendance table deliberately
+ * gives no indication that a record was amended.
+ */
+export async function getCorrectionAuditLog(req, res) {
+  const { id } = req.params;
+  const employeeId = parseInt(id);
+
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Only admins can view correction history' });
+  }
+
+  try {
+    const result = await query(
+      `SELECT ac.rowid as id, ac.attendance_record_id, ar.work_date,
+              ac.original_clock_in, ac.original_clock_out, ac.original_location,
+              ac.requested_clock_in, ac.requested_clock_out, ac.requested_location,
+              ac.status, ac.approval_date, ac.created_at,
+              u.email as applied_by
+       FROM attendance_corrections ac
+       LEFT JOIN attendance_records ar ON ar.rowid = ac.attendance_record_id
+       LEFT JOIN users u ON u.rowid = ac.approved_by
+       WHERE ac.employee_id = ?
+       ORDER BY ac.created_at DESC`,
+      [employeeId]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching correction audit log:', error);
+    res.status(500).json({ error: 'Failed to fetch correction history' });
   }
 }
 
@@ -334,7 +466,7 @@ export async function addRetrospectiveAttendance(req, res) {
   }
 
   try {
-    const totalHours = calculateHours(clock_in_time, clock_out_time);
+    const totalHours = calculateNetHours(clock_in_time, clock_out_time);
 
     await query(
       `INSERT INTO attendance_records (employee_id, work_date, clock_in_time, clock_out_time, location, site_name, total_hours, notes, status)
@@ -349,7 +481,7 @@ export async function addRetrospectiveAttendance(req, res) {
     );
 
     res.status(201).json({
-      ...result.rows[0],
+      ...withHours(result.rows[0]),
       message: `Attendance record added for ${work_date}`
     });
   } catch (error) {
@@ -381,7 +513,7 @@ export async function getCurrentClockInStatus(req, res) {
     } else {
       res.json({
         isClockedIn: true,
-        record: result.rows[0]
+        record: withHours(result.rows[0])
       });
     }
   } catch (error) {

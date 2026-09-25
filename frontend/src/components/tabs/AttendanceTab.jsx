@@ -15,8 +15,10 @@ function AttendanceTab({ employee, currentUser, isReadOnly = false }) {
   const [correctionData, setCorrectionData] = useState({
     requested_clock_in: '',
     requested_clock_out: '',
-    reason: ''
+    requested_location: ''
   });
+  const [correctionLog, setCorrectionLog] = useState([]);
+  const [showCorrectionLog, setShowCorrectionLog] = useState(false);
   const [showRetrospectiveForm, setShowRetrospectiveForm] = useState(false);
   const [retrospectiveData, setRetrospectiveData] = useState({
     work_date: '',
@@ -32,6 +34,7 @@ function AttendanceTab({ employee, currentUser, isReadOnly = false }) {
   useEffect(() => {
     fetchClockStatus();
     fetchAttendanceHistory();
+    if (currentUser?.role === 'admin') fetchCorrectionLog();
   }, [employee.id]);
 
   async function fetchClockStatus() {
@@ -68,6 +71,21 @@ function AttendanceTab({ employee, currentUser, isReadOnly = false }) {
       }
     } catch (error) {
       console.error('Error fetching history:', error);
+    }
+  }
+
+  async function fetchCorrectionLog() {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/employees/${employee.id}/attendance/corrections`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        setCorrectionLog(await response.json());
+      }
+    } catch (error) {
+      console.error('Error fetching correction log:', error);
     }
   }
 
@@ -139,7 +157,7 @@ function AttendanceTab({ employee, currentUser, isReadOnly = false }) {
   }
 
   async function handleRequestCorrection() {
-    if (!correctionData.requested_clock_in || !correctionData.reason) {
+    if (!correctionData.requested_clock_in) {
       setMessage({ type: 'error', text: 'Please fill in all required fields' });
       return;
     }
@@ -158,12 +176,13 @@ function AttendanceTab({ employee, currentUser, isReadOnly = false }) {
       });
 
       if (response.ok) {
-        setMessage({ type: 'success', text: 'Correction request submitted' });
+        setMessage({ type: 'success', text: 'Attendance record updated' });
         setShowCorrectionForm(false);
-        setCorrectionData({ requested_clock_in: '', requested_clock_out: '', reason: '' });
+        setCorrectionData({ requested_clock_in: '', requested_clock_out: '', requested_location: '' });
         setSelectedRecord(null);
         setTimeout(() => setMessage(null), 3000);
         fetchAttendanceHistory();
+        if (currentUser?.role === 'admin') fetchCorrectionLog();
       } else {
         const error = await response.json();
         setMessage({ type: 'error', text: error.error || 'Failed to submit correction' });
@@ -228,6 +247,28 @@ function AttendanceTab({ employee, currentUser, isReadOnly = false }) {
   function formatDate(dateString) {
     if (!dateString) return '--';
     return new Date(dateString + 'T00:00:00').toLocaleDateString('en-GB');
+  }
+
+  /*
+   * Records amended before corrections were hidden still carry a 'Corrected'
+   * status. Surfacing it would disclose the amendment, so it is shown as the
+   * ordinary status the record would otherwise have.
+   */
+  function formatHours(hours) {
+    return hours === null || hours === undefined ? '--' : `${hours.toFixed(2)}h`;
+  }
+
+  // Whether a shift actually overlapped the unpaid window is decided server-side;
+  // this only labels the fixed break it deducts.
+  function formatBreak(record) {
+    return record.break_hours ? '1:00 PM–2:00 PM (1 hr)' : '--';
+  }
+
+  function displayStatus(record) {
+    if (record.status === 'Corrected') {
+      return record.clock_out_time ? 'complete' : 'incomplete';
+    }
+    return record.status;
   }
 
   if (isLoading) {
@@ -431,10 +472,12 @@ function AttendanceTab({ employee, currentUser, isReadOnly = false }) {
                     <th>Date</th>
                     <th>Clock In</th>
                     <th>Clock Out</th>
+                    <th>Break</th>
+                    <th>Gross Hours</th>
+                    <th>Net Hours</th>
                     <th>Location</th>
-                    <th>Hours</th>
                     <th>Status</th>
-                    <th>Action</th>
+                    {currentUser?.role === 'admin' && <th>Action</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -452,11 +495,13 @@ function AttendanceTab({ employee, currentUser, isReadOnly = false }) {
                         <td>{formatDate(record.work_date)}</td>
                         <td>{formatTime(record.clock_in_time)}</td>
                         <td>{formatTime(record.clock_out_time)}</td>
+                        <td>{formatBreak(record)}</td>
+                        <td>{formatHours(record.gross_hours)}</td>
+                        <td>{formatHours(record.net_hours)}</td>
                         <td>{record.location}</td>
-                        <td>{record.total_hours ? record.total_hours.toFixed(2) : '--'}</td>
-                        <td><span className={`status ${record.status}`}>{record.status}</span></td>
-                        <td>
-                          {record.status === 'incomplete' && (
+                        <td><span className={`status ${displayStatus(record)}`}>{displayStatus(record)}</span></td>
+                        {currentUser?.role === 'admin' && (
+                          <td>
                             <button
                               className="btn-correction"
                               onClick={() => {
@@ -464,15 +509,15 @@ function AttendanceTab({ employee, currentUser, isReadOnly = false }) {
                                 setCorrectionData({
                                   requested_clock_in: record.clock_in_time || '',
                                   requested_clock_out: record.clock_out_time || '',
-                                  reason: ''
+                                  requested_location: record.location || 'Head Office'
                                 });
                                 setShowCorrectionForm(true);
                               }}
                             >
-                              Request Correction
+                              Edit
                             </button>
-                          )}
-                        </td>
+                          </td>
+                        )}
                       </tr>
                     ));
                   })()}
@@ -543,11 +588,67 @@ function AttendanceTab({ employee, currentUser, isReadOnly = false }) {
         )}
       </div>
 
+      {/* Correction audit log. The attendance table above deliberately gives no
+          sign that a record was amended, so this is the only place corrections
+          surface — gated on role here and on an admin-only endpoint. */}
+      {currentUser?.role === 'admin' && (
+        <div className="history-section" style={{ marginTop: '30px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h3 style={{ margin: 0 }}>Correction Audit Log (Admin Only)</h3>
+            <button
+              className="btn-add-retrospective"
+              onClick={() => setShowCorrectionLog(!showCorrectionLog)}
+            >
+              {showCorrectionLog ? 'Hide' : `Show (${correctionLog.length})`}
+            </button>
+          </div>
+
+          {showCorrectionLog && (
+            correctionLog.length === 0 ? (
+              <p className="empty-message">No corrections recorded</p>
+            ) : (
+              <div className="history-table-wrapper">
+                <table className="history-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Original In</th>
+                      <th>Original Out</th>
+                      <th>Original Location</th>
+                      <th>Corrected In</th>
+                      <th>Corrected Out</th>
+                      <th>Corrected Location</th>
+                      <th>Applied By</th>
+                      <th>When</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {correctionLog.map(entry => (
+                      <tr key={entry.id}>
+                        <td>{formatDate(entry.work_date)}</td>
+                        <td>{formatTime(entry.original_clock_in)}</td>
+                        <td>{formatTime(entry.original_clock_out)}</td>
+                        <td>{entry.original_location || '--'}</td>
+                        <td>{formatTime(entry.requested_clock_in)}</td>
+                        <td>{formatTime(entry.requested_clock_out)}</td>
+                        <td>{entry.requested_location || '--'}</td>
+                        <td>{entry.applied_by || '--'}</td>
+                        <td>{entry.created_at ? new Date(entry.created_at).toLocaleString('en-GB') : '--'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )
+          )}
+        </div>
+      )}
+
       {/* Correction Form Modal */}
       {showCorrectionForm && selectedRecord && (
         <div className="modal-overlay" onClick={() => setShowCorrectionForm(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ marginBottom: '20px' }}>Request Attendance Correction</h3>
+            <h3 style={{ marginBottom: '20px' }}>Edit Attendance Record</h3>
 
             <div className="form-group">
               <label>Original Clock In Time</label>
@@ -594,13 +695,17 @@ function AttendanceTab({ employee, currentUser, isReadOnly = false }) {
             </div>
 
             <div className="form-group">
-              <label>Reason for Correction *</label>
-              <textarea
-                value={correctionData.reason}
-                onChange={(e) => setCorrectionData({ ...correctionData, reason: e.target.value })}
-                placeholder="Explain why this correction is needed"
-                rows="3"
-              />
+              <label>Work Location</label>
+              <select
+                value={correctionData.requested_location}
+                onChange={(e) => setCorrectionData({ ...correctionData, requested_location: e.target.value })}
+              >
+                <option value="Head Office">Head Office</option>
+                <option value="Home">Home</option>
+                <option value="Customer Property">Customer Property</option>
+                <option value="Project / Site">Project / Site</option>
+                <option value="Other">Other</option>
+              </select>
             </div>
 
             <div className="form-actions">
@@ -609,7 +714,7 @@ function AttendanceTab({ employee, currentUser, isReadOnly = false }) {
                 onClick={handleRequestCorrection}
                 disabled={isProcessing}
               >
-                {isProcessing ? 'Submitting...' : 'Submit Request'}
+                {isProcessing ? 'Saving...' : 'Save Changes'}
               </button>
               <button
                 className="btn-cancel"
